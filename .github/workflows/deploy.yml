@@ -1,0 +1,81 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    # Ne déployer que si les tests CI ont réussi
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Configure SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key.pem
+        chmod 600 ~/.ssh/deploy_key.pem
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+    
+    - name: Deploy to EC2
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+      run: |
+        ssh -i ~/.ssh/deploy_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          # Aller dans le répertoire du projet
+          cd ~/DevOps-MLOps || { echo "❌ Répertoire non trouvé"; exit 1; }
+          
+          # Rendre le script exécutable s'il existe
+          if [ -f deploy.sh ]; then
+            chmod +x deploy.sh
+            ./deploy.sh
+          else
+            # Fallback: déploiement manuel si le script n'existe pas
+            echo "📥 Récupération du code..."
+            git fetch origin
+            git reset --hard origin/main || git reset --hard origin/master
+            
+            echo "🛑 Arrêt de l'ancien conteneur..."
+            docker stop credit-api 2>/dev/null || true
+            docker rm credit-api 2>/dev/null || true
+            
+            echo "🔨 Construction de l'image Docker..."
+            docker build -f docker/Dockerfile -t credit-scoring-api .
+            
+            echo "🚀 Lancement du nouveau conteneur..."
+            docker run -d -p 5000:5000 --name credit-api --restart unless-stopped credit-scoring-api
+            
+            sleep 5
+            if curl -f http://localhost:5000/health > /dev/null 2>&1; then
+              echo "✅ API démarrée avec succès!"
+            else
+              echo "❌ Erreur: L'API ne répond pas"
+              docker logs credit-api
+              exit 1
+            fi
+          fi
+        ENDSSH
+    
+    - name: Verify deployment
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+      run: |
+        echo "🔍 Vérification depuis l'extérieur..."
+        sleep 3
+        if curl -f http://${{ secrets.EC2_HOST }}:5000/health; then
+          echo "✅ L'API est accessible depuis l'extérieur!"
+        else
+          echo "⚠️ L'API n'est pas accessible depuis l'extérieur (vérifiez le Security Group)"
+        fi
+
