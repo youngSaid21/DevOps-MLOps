@@ -1,6 +1,6 @@
 # Projet de Scoring de Crédit
 
-Projet complet de machine learning pour la prédiction du remboursement de crédit, incluant l'entraînement d'un modèle XGBoost, une API REST Flask, et la containerisation Docker.
+Projet complet de machine learning pour la prédiction du remboursement de crédit, incluant l'entraînement d'un modèle XGBoost, une API REST Flask, la containerisation Docker, et le déploiement automatique sur AWS EC2 avec CI/CD.
 
 ## 📋 Description
 
@@ -11,11 +11,13 @@ Ce projet vise à prédire la probabilité de remboursement d'un prêt en utilis
 - **API REST** : Service web Flask pour exposer le modèle en production
 - **Containerisation** : Déploiement avec Docker
 - **Tests** : Suite de tests unitaires pour l'API
+- **CI/CD** : Intégration continue avec GitHub Actions
+- **Déploiement automatique** : Déploiement automatique sur AWS EC2 à chaque push
 
 ## 🏗️ Structure du projet
 
 ```
-DevOps/
+DevOps-MLOps/
 ├── api/                          # Application Flask
 │   ├── app.py                    # Application Flask principale
 │   └── model_loader.py           # Chargement du modèle XGBoost
@@ -29,7 +31,12 @@ DevOps/
 │   └── Dockerfile
 ├── tests/                        # Tests unitaires
 │   └── test_api.py
+├── .github/                      # Configuration GitHub Actions
+│   └── workflows/
+│       ├── ci.yml                # Workflow CI (tests)
+│       └── deploy.yml             # Workflow CD (déploiement)
 ├── docs/                         # Documentation et captures d'écran
+├── deploy.sh                     # Script de déploiement pour EC2
 ├── requirements.txt              # Dépendances Python
 └── README.md
 ```
@@ -38,7 +45,9 @@ DevOps/
 
 - Python 3.11+
 - Jupyter Notebook (pour l'exploration et l'entraînement)
-- Docker (optionnel, pour la containerisation)
+- Docker (pour la containerisation)
+- Compte AWS avec instance EC2 (pour le déploiement)
+- Compte GitHub (pour CI/CD)
 
 ## 🚀 Installation
 
@@ -176,7 +185,7 @@ Effectue une prédiction de remboursement.
 }
 ```
 
-**Exemple avec curl** :
+**Exemple avec curl (local)** :
 ```bash
 curl -X POST http://localhost:5000/predict \
   -H "Content-Type: application/json" \
@@ -207,6 +216,13 @@ curl -X POST http://localhost:5000/predict \
   }'
 ```
 
+**Exemple avec curl (API déployée sur EC2)** :
+```bash
+curl -X POST http://[VOTRE_IP_EC2]:5000/predict \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+```
+
 ## 🧪 Tests
 
 Exécuter les tests unitaires de l'API :
@@ -230,6 +246,84 @@ Les tests couvrent :
 - **numpy 2.4.0** : Calculs numériques
 - **scipy 1.16.3** : Outils scientifiques
 
+## 🚀 CI/CD et Déploiement Automatique
+
+### GitHub Actions Workflows
+
+Le projet utilise GitHub Actions pour l'intégration et le déploiement continus :
+
+#### Workflow CI (`.github/workflows/ci.yml`)
+- **Déclenchement** : À chaque push/PR sur `main`, `master`, ou `develop`
+- **Tests** : Exécution des tests unitaires sur Python 3.11
+- **Build Docker** : Vérification que l'image Docker se construit correctement
+- **Linting** : Vérification du style de code (Black, isort, flake8)
+
+#### Workflow CD (`.github/workflows/deploy.yml`)
+- **Déclenchement** : Après succès du workflow CI sur `main` ou `master`
+- **Déploiement** : Connexion SSH à EC2 et déploiement automatique
+- **Processus** :
+  1. Pull du code depuis GitHub
+  2. Rebuild de l'image Docker
+  3. Redémarrage du conteneur
+  4. Vérification que l'API fonctionne
+
+### Configuration du Déploiement Automatique
+
+Pour activer le déploiement automatique, configurez les secrets GitHub :
+
+1. **Allez dans** : Repository → Settings → Secrets and variables → Actions
+2. **Ajoutez ces secrets** :
+   - `EC2_HOST` : L'IP publique de votre instance EC2
+   - `EC2_USER` : L'utilisateur SSH (généralement `ubuntu`)
+   - `EC2_SSH_KEY` : Le contenu complet de votre clé SSH `.pem`
+
+### Déploiement Manuel sur EC2
+
+Si vous préférez déployer manuellement :
+
+```bash
+# 1. Se connecter à EC2
+ssh -i my_key.pem ubuntu@[VOTRE_IP_EC2]
+
+# 2. Aller dans le projet
+cd ~/DevOps-MLOps
+
+# 3. Pull le code
+git pull origin main
+
+# 4. Exécuter le script de déploiement
+chmod +x deploy.sh
+./deploy.sh
+```
+
+### Déploiement avec Docker sur EC2
+
+```bash
+# Sur l'instance EC2
+cd ~/DevOps-MLOps
+
+# Construire l'image
+docker build -f docker/Dockerfile -t credit-scoring-api .
+
+# Lancer le conteneur
+docker run -d -p 5000:5000 --name credit-api --restart unless-stopped credit-scoring-api
+
+# Vérifier les logs
+docker logs credit-api
+
+# Tester l'API
+curl http://localhost:5000/health
+```
+
+### Accès à l'API Déployée
+
+Une fois déployée, l'API est accessible sur :
+```
+http://[VOTRE_IP_EC2]:5000
+```
+
+**Important** : Assurez-vous que le Security Group EC2 autorise le trafic sur le port 5000.
+
 ## 🔍 Workflow complet
 
 1. **Exploration** : Analyser les données dans `notebooks/model_train.ipynb`
@@ -237,8 +331,9 @@ Les tests couvrent :
 3. **Entraînement** : Entraîner le modèle XGBoost
 4. **Sauvegarde** : Sauvegarder le modèle dans `model/`
 5. **API** : Exposer le modèle via l'API Flask
-6. **Déploiement** : Containeriser avec Docker
-7. **Tests** : Valider le fonctionnement avec les tests unitaires
+6. **Tests** : Valider le fonctionnement avec les tests unitaires
+7. **CI/CD** : Tests automatiques avec GitHub Actions
+8. **Déploiement** : Déploiement automatique sur EC2 à chaque push
 
 ## 📝 Notes importantes
 
@@ -251,3 +346,52 @@ Les tests couvrent :
 ## 📚 Documentation
 
 Des captures d'écran et de la documentation supplémentaire sont disponibles dans le dossier `docs/`.
+
+## 🔐 Sécurité
+
+- Les clés SSH et les informations sensibles sont stockées dans les secrets GitHub
+- Le fichier `.gitignore` exclut les fichiers sensibles (`my_key.pem`, `.env`, etc.)
+- Les adresses IP publiques doivent être masquées dans les captures d'écran et la documentation
+
+## 📊 Architecture de Déploiement
+
+```
+┌─────────────┐
+│   GitHub    │
+│  Repository │
+└──────┬──────┘
+       │ Push
+       ▼
+┌─────────────┐
+│ GitHub      │
+│ Actions CI  │ ──► Tests, Build Docker
+└──────┬──────┘
+       │ Success
+       ▼
+┌─────────────┐
+│ GitHub      │
+│ Actions CD  │ ──► SSH to EC2
+└──────┬──────┘
+       │ Deploy
+       ▼
+┌─────────────┐
+│   AWS EC2   │
+│  Instance   │
+│  ┌────────┐ │
+│  │ Docker │ │ ──► API Flask
+│  │Container│ │
+│  └────────┘ │
+└─────────────┘
+       │
+       ▼
+  http://[IP]:5000
+```
+
+## 🛠️ Technologies Utilisées
+
+- **Machine Learning** : XGBoost, scikit-learn, pandas
+- **API** : Flask
+- **Containerisation** : Docker
+- **CI/CD** : GitHub Actions
+- **Cloud** : AWS EC2
+- **Version Control** : Git, GitHub
