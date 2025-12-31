@@ -218,7 +218,7 @@ curl -X POST http://localhost:5000/predict \
 
 **Exemple avec curl (API déployée sur EC2)** :
 ```bash
-curl -X POST http://[VOTRE_IP_EC2]:5000/predict \
+curl -X POST http://[IP_EC2]:5000/predict \
   -H "Content-Type: application/json" \
   -d '{...}'
 ```
