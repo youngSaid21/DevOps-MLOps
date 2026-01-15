@@ -5,23 +5,22 @@ from model_loader import ModelLoader
 app = Flask(__name__)
 
 # Initialisation globale du modèle au démarrage de l'API
-# On suppose que le fichier est dans le même répertoire
 predictor = ModelLoader("model/xgboost_credit_scoring_final.json")
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # 1. Récupération des données JSON envoyées par l'utilisateur
+        # Récupération des données JSON envoyées par l'utilisateur
         data = request.get_json()
         
-        # 2. Conversion en DataFrame (XGBoost a besoin du nom des colonnes)
+        # Conversion en DataFrame (XGBoost a besoin du nom des colonnes)
         # On s'attend à recevoir les 23 features scalées
         df_input = pd.DataFrame([data])
         
-        # 3. Prédiction via notre loader
+        # Prédiction via notre loader
         prob, class_pred = predictor.predict(df_input)
         
-        # 4. Retourner le résultat
+        # Retourner le résultat
         return jsonify({
             "status": "success",
             "probability_of_repayment": round(float(prob), 4),

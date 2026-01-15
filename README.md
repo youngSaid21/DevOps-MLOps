@@ -2,7 +2,7 @@
 
 Projet complet de machine learning pour la prédiction du remboursement de crédit, incluant l'entraînement d'un modèle XGBoost, une API REST Flask, la containerisation Docker, et le déploiement automatique sur AWS EC2 avec CI/CD.
 
-## 📋 Description
+## Description
 
 Ce projet vise à prédire la probabilité de remboursement d'un prêt en utilisant des techniques de machine learning. Il comprend :
 
@@ -14,7 +14,7 @@ Ce projet vise à prédire la probabilité de remboursement d'un prêt en utilis
 - **CI/CD** : Intégration continue avec GitHub Actions
 - **Déploiement automatique** : Déploiement automatique sur AWS EC2 à chaque push
 
-## 🏗️ Structure du projet
+## Structure du projet
 
 ```
 DevOps-MLOps/
@@ -41,7 +41,7 @@ DevOps-MLOps/
 └── README.md
 ```
 
-## 🔧 Prérequis
+## Prérequis
 
 - Python 3.11+
 - Jupyter Notebook (pour l'exploration et l'entraînement)
@@ -49,7 +49,7 @@ DevOps-MLOps/
 - Compte AWS avec instance EC2 (pour le déploiement)
 - Compte GitHub (pour CI/CD)
 
-## 🚀 Installation
+## Installation
 
 1. **Cloner le projet**
 
@@ -64,7 +64,7 @@ source env/bin/activate  # Sur Windows: env\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## 📊 Données
+## Données
 
 Le dataset contient des informations sur les prêts avec les variables suivantes :
 
@@ -74,7 +74,7 @@ Le dataset contient des informations sur les prêts avec les variables suivantes
 
 Les données sont stockées dans `data/data.csv`.
 
-## 🎓 Entraînement du modèle
+## Entraînement du modèle
 
 ### Préprocessing
 
@@ -102,7 +102,7 @@ jupyter notebook notebooks/model_train.ipynb
 
 Le modèle entraîné est sauvegardé dans `model/xgboost_credit_scoring_final.json`.
 
-## 💻 Utilisation de l'API
+## Utilisation de l'API
 
 ### Lancer l'API localement
 
@@ -130,7 +130,7 @@ docker run -p 5000:5000 credit-scoring-api
 docker run -d -p 5000:5000 --name credit-api credit-scoring-api
 ```
 
-## 📡 Endpoints API
+## Endpoints API
 
 ### `GET /health`
 Vérifie le statut de l'API et du modèle.
@@ -223,7 +223,7 @@ curl -X POST http://[IP_EC2]:5000/predict \
   -d '{...}'
 ```
 
-## 🧪 Tests
+## Tests
 
 Exécuter les tests unitaires de l'API :
 
@@ -237,7 +237,7 @@ Les tests couvrent :
 - Gestion des erreurs (données manquantes, JSON invalide)
 - Validation des méthodes HTTP
 
-## 📦 Dépendances principales
+## Dépendances principales
 
 - **Flask 3.1.2** : Framework web
 - **XGBoost 3.1.2** : Modèle de machine learning
@@ -246,7 +246,7 @@ Les tests couvrent :
 - **numpy 2.4.0** : Calculs numériques
 - **scipy 1.16.3** : Outils scientifiques
 
-## 🚀 CI/CD et Déploiement Automatique
+## CI/CD et Déploiement Automatique
 
 ### GitHub Actions Workflows
 
@@ -324,7 +324,7 @@ http://[VOTRE_IP_EC2]:5000
 
 **Important** : Assurez-vous que le Security Group EC2 autorise le trafic sur le port 5000.
 
-## 🔍 Workflow complet
+## Workflow complet
 
 1. **Exploration** : Analyser les données dans `notebooks/model_train.ipynb`
 2. **Preprocessing** : Préparer les données (encodage, normalisation)
@@ -335,7 +335,7 @@ http://[VOTRE_IP_EC2]:5000
 7. **CI/CD** : Tests automatiques avec GitHub Actions
 8. **Déploiement** : Déploiement automatique sur EC2 à chaque push
 
-## 📝 Notes importantes
+## Notes importantes
 
 - Le modèle attend **23 features pré-traitées** (normalisées et encodées)
 - Les données doivent être au format JSON avec **toutes les colonnes requises**
@@ -343,17 +343,17 @@ http://[VOTRE_IP_EC2]:5000
 - Les variables numériques doivent être normalisées (StandardScaler)
 - Les variables catégorielles doivent être encodées (one-hot avec drop='first')
 
-## 📚 Documentation
+## Documentation
 
 Des captures d'écran et de la documentation supplémentaire sont disponibles dans le dossier `docs/`.
 
-## 🔐 Sécurité
+## Sécurité
 
 - Les clés SSH et les informations sensibles sont stockées dans les secrets GitHub
 - Le fichier `.gitignore` exclut les fichiers sensibles (`my_key.pem`, `.env`, etc.)
 - Les adresses IP publiques doivent être masquées dans les captures d'écran et la documentation
 
-## 📊 Architecture de Déploiement
+## Architecture de Déploiement
 
 ```
 ┌─────────────┐
@@ -387,7 +387,7 @@ Des captures d'écran et de la documentation supplémentaire sont disponibles da
   http://[IP]:5000
 ```
 
-## 🛠️ Technologies Utilisées
+## Technologies Utilisées
 
 - **Machine Learning** : XGBoost, scikit-learn, pandas
 - **API** : Flask

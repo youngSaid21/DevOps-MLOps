@@ -98,22 +98,6 @@ dmypy.json
 # Cython
 cython_debug/
 
-# Modèles ML (optionnel - décommentez si vous ne voulez pas versionner les modèles)
-# *.pkl
-# *.joblib
-# *.h5
-# *.hdf5
-# *.pb
-# *.onnx
-# model/
-# models/
-
-# Données (optionnel - décommentez si vous ne voulez pas versionner les données)
-# data/
-# *.csv
-# *.parquet
-# *.feather
-
 # Logs
 *.log
 logs/
