@@ -389,7 +389,7 @@ Des captures d'écran et de la documentation supplémentaire sont disponibles da
 
 ## Technologies Utilisées
 
-- **Machine Learning** : XGBoost, scikit-learn, pandas
+- **Machine Learning** : XGBoost, scikit-learn
 - **API** : Flask
 - **Containerisation** : Docker
 - **CI/CD** : GitHub Actions
